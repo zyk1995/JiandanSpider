@@ -19,7 +19,7 @@ class Spider:
             'Referer'   : 'https://jandan.net/ooxx',
             'Upgrade-Insecure-Requests':	'1'
 
-        }
+    }
     #--------------------------------
     #通用方法
     #封装常用到的代码减少代码量
@@ -56,7 +56,7 @@ class Spider:
         		return False
     #保存数据到本地
     def writeToFile(self, path, name, data):
-        f = open(path + name,'wb')
+        f = open(path + "/" + name,'wb')
         f.write(data)
         print ("数据" + name + "已保存到本地" + path)
         f.close()
