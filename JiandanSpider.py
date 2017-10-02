@@ -8,6 +8,9 @@ import tool
 import ssl
 import os
 
+#-----------------------------------
+#煎蛋网爬虫
+#-----------------------------------
 class Spider:
 
     def __init__(self,url):
@@ -105,17 +108,19 @@ class Spider:
     #爬虫方法
     #实现分步爬虫，降低耦合性
     #----------------------------------
-
-    #range为元组，规定爬取页面的范围
-    def crawl(self, range):
-        crawl(self, url, range[0], range[1])
+    def crawlPage(self, index):
+        print ("正在爬取第" + str(index) + "页")
+        page = self.getPage(index)
+        contents = self.getContents(page)
+        self.downloadImage(contents, "./meizitu" + str(index))
+    #----------------------------------------
+    #批量爬取页面
+    #----------------------------------------
     def crawl(self, start, end):
         for i in range(start, end):
-            page = self.getPage(i)
-            contents = self.getContents(page)
-            self.downloadImage(contents)
-
+            self.crawlPage(i)
             print ("开始爬取下一个页面")
 url = 'https://jandan.net/ooxx'
 spider = Spider(url)
-spider.crawl(101, 110)
+
+spider.crawl(1, 110)
