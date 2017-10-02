@@ -1,2 +1,2 @@
-# MySpiderPy
-可定制的通用爬虫框架
+# JiandanSpider
+煎蛋网妹子图爬虫
