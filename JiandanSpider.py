@@ -7,6 +7,8 @@ import re
 import tool
 import ssl
 import os
+import sys
+
 
 #-----------------------------------
 #煎蛋网爬虫
@@ -120,7 +122,20 @@ class Spider:
         for i in range(start, end):
             self.crawlPage(i)
             print ("开始爬取下一个页面")
+    def crawlUsingThread(self, start, end):
+        pass
+
+if(len(sys.argv) != 3):
+    print("正确的使用方法：输入一个起始页码，一个终止页码！")
+    exit()
+
+start = int(sys.argv[1])
+end = int(sys.argv[2])
+
+if(start > end) :
+    print("起始页码不能大于终止页码")
+    exit()
+
 url = 'https://jandan.net/ooxx'
 spider = Spider(url)
-
-spider.crawl(1, 110)
+spider.crawl(start, end)
