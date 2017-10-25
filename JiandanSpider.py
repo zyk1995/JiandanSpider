@@ -121,12 +121,18 @@ class Spider:
     def crawl(self, start, end):
         for i in range(start, end):
             self.crawlPage(i)
-            print ("开始爬取下一个页面")
+            if(i != end - 1):
+                print ("开始爬取下一个页面")
     def crawlUsingThread(self, start, end):
         pass
-
+    
+url = 'https://jandan.net/ooxx'
+spider = Spider(url)
+start = 1
+end = 100
 if(len(sys.argv) != 3):
     print("正确的使用方法：输入一个起始页码，一个终止页码！")
+    spider.crawl(start, end)
     exit()
 
 start = int(sys.argv[1])
@@ -136,6 +142,4 @@ if(start > end) :
     print("起始页码不能大于终止页码")
     exit()
 
-url = 'https://jandan.net/ooxx'
-spider = Spider(url)
 spider.crawl(start, end)
