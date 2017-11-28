@@ -1,7 +1,7 @@
 __author__="ZYK"
 # -*- coding:utf-8 -*-
-import urllib
-from urllib import request
+import requests
+from proxy import Proxy
 from bs4 import BeautifulSoup
 import re
 import tool
@@ -9,7 +9,7 @@ import ssl
 import os
 import sys
 
-
+proxy = Proxy()
 #-----------------------------------
 #煎蛋网爬虫
 #-----------------------------------
@@ -35,10 +35,12 @@ class Spider:
 
     #访问网络资源
     def openUrl(self, url):
-        req = request.Request(url, headers=self.headers)
-        gcontext = ssl.SSLContext(ssl.PROTOCOL_TLSv1)
+        self.headers['User-Agent'] = proxy.getagent()
+
         print ("正在访问" + url)
-        resp = request.urlopen(req,context=gcontext)
+
+        resp = requests.get(url, headers=self.headers, proxies=proxy.getproxies())
+
         print (url + "资源已取得")
         return resp;
 
@@ -73,8 +75,8 @@ class Spider:
     def getPage(self, pageIndex):
         url = self.siteURL + "/page-"+str(pageIndex)
         print ("正在爬取页面" + url)
-        response = self.openUrl(url)
-        page = response.read().decode('utf-8')
+        resp = self.openUrl(url)
+        page = resp.text
         #print (page)
         return page
 
@@ -85,7 +87,7 @@ class Spider:
             print ("正在下载文件（ %d ）%s " % (i, item))
             image_name= str(i)+item[-4:]
             resp = self.openUrl(item)
-            self.writeToFile(target_path, image_name, resp.read())
+            self.writeToFile(target_path, image_name, resp.text)
     def downloadImage(self, items, target_path="./Photo"):
            self.mkdir(target_path)
            print("正在下载图片...")
@@ -94,16 +96,20 @@ class Spider:
                 print ("正在下载图片（ %d ）%s " % (i, item))
                 image_name= str(i)+item[-4:]
                 resp = self.openUrl("http:" + item)
-                self.writeToFile(target_path, image_name, resp.read())
+                self.writeToFile(target_path, image_name, resp.text)
 
 
     def getContents(self, page):
         print ("正在匹配...")
-        pattern = re.compile('<img src="(//wx4.sinaimg.cn/.*?)"',re.S)
-        items = re.findall(pattern,page)
 
+        soup = BeautifulSoup(page, "html.parser")
+        #items = soup.findAll("a", class_="view_img_link", target="_blank")
+        items = soup.select("a .view_img_link")
+        print(items[8])
+        print('items='+str(len(items)))
         for i, item in enumerate(items):
-            print ("匹配到的内容（ %d ）%s " % (i, item))
+            items[i] = item.get_text()
+            print ("匹配到的内容（ %d ）%s " % (i, items[i]))
 
         return items
     #----------------------------------
@@ -125,7 +131,7 @@ class Spider:
 
     def getLatestPage(self):
         response = self.openUrl(self.siteURL)
-        page = response.read().decode('utf-8')
+        page = response.text
         soup = BeautifulSoup(page, "html.parser")
         text = soup.find('span', class_='current-comment-page').get_text()
         return text[1:-1]
@@ -137,7 +143,7 @@ class Spider:
     def crawlLatestPics(self, num):
         curr = self.getLatestPage()
         for i in  range(0, num):
-            pass
+            self.crawlPage(int(curr)-i)
 if __name__ == '__main__':
 
     '''
@@ -155,6 +161,11 @@ if __name__ == '__main__':
     '''
     url = 'https://jandan.net/ooxx'
     spider = Spider(url)
+    page = spider.getPage(100)
+    fd = open('./test.txt', 'w')
+    print(page, end = '\n', file = fd)
+
+    #spider.getContents(spider.getPage(100))
     #spider.crawl(100, 110)
-    print(spider.getLatestPage())
-    spider.crawlLatestPics(10)
+    #print(spider.getLatestPage())
+    #spider.crawlLatestPics(10)
