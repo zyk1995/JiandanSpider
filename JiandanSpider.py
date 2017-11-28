@@ -49,16 +49,16 @@ class Spider:
 
     #创建文件夹
     def mkdir(self, path):
-        	path = path.strip();
+        path = path.strip()
 
-        	isExists=os.path.exists(path)
-        	if not isExists:
-        		os.makedirs(path)
-        		print ("创建目录"+path)
-        		return True
-        	else:
-        		print (u'名为'+path+'的文件夹已经存在')
-        		return False
+        isExists=os.path.exists(path)
+        if not isExists:
+            os.makedirs(path)
+            print ("创建目录"+path)
+            return True
+        else:
+            print (u'名为'+path+'的文件夹已经存在')
+            return False
     #保存数据到本地
     def writeToFile(self, path, name, data):
         f = open(path + "/" + name,'wb')
@@ -122,20 +122,39 @@ class Spider:
         for i in range(start, end):
             self.crawlPage(i)
             print ("开始爬取下一个页面")
+
+    def getLatestPage(self):
+        response = self.openUrl(self.siteURL)
+        page = response.read().decode('utf-8')
+        soup = BeautifulSoup(page, "html.parser")
+        text = soup.find('span', class_='current-comment-page').get_text()
+        return text[1:-1]
     def crawlUsingThread(self, start, end):
         pass
+    #-----------------------------------------
+    #获取最新的n张图片
+    #-----------------------------------------
+    def crawlLatestPics(self, num):
+        curr = self.getLatestPage()
+        for i in  range(0, num):
+            pass
+if __name__ == '__main__':
 
-if(len(sys.argv) != 3):
-    print("正确的使用方法：输入一个起始页码，一个终止页码！")
-    exit()
+    '''
+    #传入命令行参数
+    if(len(sys.argv) != 3):
+        print("正确的使用方法：输入一个起始页码，一个终止页码！")
+        exit()
 
-start = int(sys.argv[1])
-end = int(sys.argv[2])
+    start = int(sys.argv[1])
+    end = int(sys.argv[2])
 
-if(start > end) :
-    print("起始页码不能大于终止页码")
-    exit()
-
-url = 'https://jandan.net/ooxx'
-spider = Spider(url)
-spider.crawl(start, end)
+    if(start > end) :
+        print("起始页码不能大于终止页码")
+        exit()
+    '''
+    url = 'https://jandan.net/ooxx'
+    spider = Spider(url)
+    #spider.crawl(100, 110)
+    print(spider.getLatestPage())
+    spider.crawlLatestPics(10)
