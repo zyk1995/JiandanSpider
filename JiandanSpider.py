@@ -3,6 +3,9 @@ __author__="ZYK"
 import requests
 from proxy import Proxy
 from bs4 import BeautifulSoup
+# 导入selenium模块中的web引擎
+from selenium import webdriver
+
 import re
 import tool
 import ssl
@@ -35,19 +38,18 @@ class Spider:
 
     #访问网络资源
     def openUrl(self, url):
-        self.headers['User-Agent'] = proxy.getagent()
 
-        print ("正在访问" + url)
+        # 建立浏览器对象 ，通过Phantomjs
+        browser = webdriver.PhantomJS()
 
-        resp = requests.get(url, headers=self.headers, proxies=proxy.getproxies())
+        # 访问url
+        browser.get(url)
 
-        print (url + "资源已取得")
-        return resp;
+        # 等待一定时间，让js脚本加载完毕
+        browser.implicitly_wait(3)
 
-    #获取网页标题
-    def getTitle(self, page):
-        soup = BeautifulSoup(page, "html.parser")
-        return soup.title.string.encode("utf-8")
+        picUrls = browser.find_element_by_css_selector("a .view_img_link")
+        print(picUrls)
 
     #创建文件夹
     def mkdir(self, path):
@@ -160,12 +162,27 @@ if __name__ == '__main__':
         exit()
     '''
     url = 'https://jandan.net/ooxx'
-    spider = Spider(url)
-    page = spider.getPage(100)
-    fd = open('./test.txt', 'w')
-    print(page, end = '\n', file = fd)
-
+    #spider = Spider(url)
+    #spider.openUrl(url)
+    #page = spider.getPage(100)
     #spider.getContents(spider.getPage(100))
     #spider.crawl(100, 110)
     #print(spider.getLatestPage())
     #spider.crawlLatestPics(10)
+
+    # 建立浏览器对象 ，通过Phantomjs
+    browser = webdriver.PhantomJS()
+
+    # 访问url
+    browser.get(url)
+
+    # 等待一定时间，让js脚本加载完毕
+    browser.implicitly_wait(3)
+
+    picUrls = browser.find_element_by_css_selector("a.view_img_link")
+
+    print(picUrls.get_attribute("href"));
+    print(picUrls)
+
+
+
