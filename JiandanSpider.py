@@ -39,6 +39,7 @@ class Spider:
     #访问网络资源
     def openUrl(self, url):
 
+        picList = []
         # 建立浏览器对象 ，通过Phantomjs
         browser = webdriver.PhantomJS()
 
@@ -48,9 +49,16 @@ class Spider:
         # 等待一定时间，让js脚本加载完毕
         browser.implicitly_wait(3)
 
-        picUrls = browser.find_element_by_css_selector("a .view_img_link")
-        print(picUrls)
+        picUrlList = browser.find_elements_by_css_selector("a.view_img_link")
 
+        for picUrl in picUrlList:
+            picUrl = picUrl.get_attribute("href")
+            print(picUrl)
+            picList.append(picUrl)
+
+        # 关闭浏览器
+        browser.quit()
+        return picList
     #创建文件夹
     def mkdir(self, path):
         path = path.strip()
@@ -74,13 +82,11 @@ class Spider:
     #Spider方法
     #
     #----------------------------------
-    def getPage(self, pageIndex):
+    def getPagePics(self, pageIndex):
         url = self.siteURL + "/page-"+str(pageIndex)
         print ("正在爬取页面" + url)
-        resp = self.openUrl(url)
-        page = resp.text
-        #print (page)
-        return page
+        pics = self.openUrl(url)
+        return pics
 
     def downloadFile(self, items, target_path):
         self.mkdir(target_path)
@@ -97,32 +103,16 @@ class Spider:
            for i, item in enumerate(items):
                 print ("正在下载图片（ %d ）%s " % (i, item))
                 image_name= str(i)+item[-4:]
-                resp = self.openUrl("http:" + item)
-                self.writeToFile(target_path, image_name, resp.text)
-
-
-    def getContents(self, page):
-        print ("正在匹配...")
-
-        soup = BeautifulSoup(page, "html.parser")
-        #items = soup.findAll("a", class_="view_img_link", target="_blank")
-        items = soup.select("a .view_img_link")
-        print(items[8])
-        print('items='+str(len(items)))
-        for i, item in enumerate(items):
-            items[i] = item.get_text()
-            print ("匹配到的内容（ %d ）%s " % (i, items[i]))
-
-        return items
+                content = requests.get(item).content;
+                self.writeToFile(target_path, image_name, content)
     #----------------------------------
     #爬虫方法
     #实现分步爬虫，降低耦合性
     #----------------------------------
     def crawlPage(self, index):
         print ("正在爬取第" + str(index) + "页")
-        page = self.getPage(index)
-        contents = self.getContents(page)
-        self.downloadImage(contents, "./meizitu" + str(index))
+        pics = self.getPagePics(index)
+        self.downloadImage(pics, "./meizitu" + str(index))
     #----------------------------------------
     #批量爬取页面
     #----------------------------------------
@@ -162,27 +152,17 @@ if __name__ == '__main__':
         exit()
     '''
     url = 'https://jandan.net/ooxx'
-    #spider = Spider(url)
+    spider = Spider(url)
     #spider.openUrl(url)
     #page = spider.getPage(100)
     #spider.getContents(spider.getPage(100))
-    #spider.crawl(100, 110)
+    spider.crawl(100, 110)
     #print(spider.getLatestPage())
     #spider.crawlLatestPics(10)
 
-    # 建立浏览器对象 ，通过Phantomjs
-    browser = webdriver.PhantomJS()
 
-    # 访问url
-    browser.get(url)
 
-    # 等待一定时间，让js脚本加载完毕
-    browser.implicitly_wait(3)
 
-    picUrls = browser.find_element_by_css_selector("a.view_img_link")
-
-    print(picUrls.get_attribute("href"));
-    print(picUrls)
 
 
 
