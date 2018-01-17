@@ -25,9 +25,9 @@ class Spider:
         	             +'AppleWebKit/603.2.4 (KHTML, like Gecko) Version/10.1.1 Safari/603.2.4',
             'Accept'	: 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
             'Referer'   : 'https://jandan.net/ooxx',
-            'Upgrade-Insecure-Requests':	'1'
+            'Upgrade-Insecure-Requests':	'1'    }
 
-    }
+
     #--------------------------------
     #通用方法
     #封装常用到的代码减少代码量
@@ -40,24 +40,22 @@ class Spider:
     def openUrl(self, url):
 
         picList = []
-        # 建立浏览器对象 ，通过Phantomjs
-        browser = webdriver.PhantomJS()
+
 
         # 访问url
-        browser.get(url)
+        self.browser.get(url)
 
         # 等待一定时间，让js脚本加载完毕
-        browser.implicitly_wait(3)
+        self.browser.implicitly_wait(3)
 
-        picUrlList = browser.find_elements_by_css_selector("a.view_img_link")
+        picUrlList = self.browser.find_elements_by_css_selector("a.view_img_link")
 
         for picUrl in picUrlList:
             picUrl = picUrl.get_attribute("href")
             print(picUrl)
             picList.append(picUrl)
 
-        # 关闭浏览器
-        browser.quit()
+
         return picList
     #创建文件夹
     def mkdir(self, path):
@@ -117,25 +115,28 @@ class Spider:
     #批量爬取页面
     #----------------------------------------
     def crawl(self, start, end):
-        for i in range(start, end):
-            self.crawlPage(i)
-            print ("开始爬取下一个页面")
 
-    def getLatestPage(self):
-        response = self.openUrl(self.siteURL)
-        page = response.text
-        soup = BeautifulSoup(page, "html.parser")
-        text = soup.find('span', class_='current-comment-page').get_text()
-        return text[1:-1]
-    def crawlUsingThread(self, start, end):
-        pass
-    #-----------------------------------------
-    #获取最新的n张图片
-    #-----------------------------------------
-    def crawlLatestPics(self, num):
-        curr = self.getLatestPage()
-        for i in  range(0, num):
-            self.crawlPage(int(curr)-i)
+        picList = []
+
+        # 建立浏览器对象 ，通过Phantomjs
+        self.browser = webdriver.PhantomJS()
+        # 访问url
+        self.browser.get(url)
+
+        # 等待一定时间，让js脚本加载完毕
+        self.browser.implicitly_wait(3)
+
+        picUrlList = self.browser.find_elements_by_css_selector("a.view_img_link")
+
+        for picUrl in picUrlList:
+            picUrl = picUrl.get_attribute("href")
+            print(picUrl)
+            picList.append(picUrl)
+
+        # 关闭浏览器
+        self.browser.quit()
+
+
 if __name__ == '__main__':
 
     '''
