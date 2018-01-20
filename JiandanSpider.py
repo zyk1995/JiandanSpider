@@ -25,8 +25,9 @@ class Spider:
         	             +'AppleWebKit/603.2.4 (KHTML, like Gecko) Version/10.1.1 Safari/603.2.4',
             'Accept'	: 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
             'Referer'   : 'https://jandan.net/ooxx',
-            'Upgrade-Insecure-Requests':	'1'    }
-
+            'Upgrade-Insecure-Requests':	'1'}
+        # 建立浏览器对象 ，通过Phantomjs
+        self.browser = webdriver.PhantomJS()
 
     #--------------------------------
     #通用方法
@@ -39,21 +40,21 @@ class Spider:
     #访问网络资源
     def openUrl(self, url):
 
-        picList = []
-
-
         # 访问url
         self.browser.get(url)
 
         # 等待一定时间，让js脚本加载完毕
         self.browser.implicitly_wait(3)
 
+        print(self.browser.title)
+        picList = []
         picUrlList = self.browser.find_elements_by_css_selector("a.view_img_link")
 
         for picUrl in picUrlList:
             picUrl = picUrl.get_attribute("href")
             print(picUrl)
             picList.append(picUrl)
+
 
 
         return picList
@@ -101,8 +102,8 @@ class Spider:
            for i, item in enumerate(items):
                 print ("正在下载图片（ %d ）%s " % (i, item))
                 image_name= str(i)+item[-4:]
-                content = requests.get(item).content;
-                self.writeToFile(target_path, image_name, content)
+                resp = self.openUrl("http:" + item)
+                self.writeToFile(target_path, image_name, resp.text)
     #----------------------------------
     #爬虫方法
     #实现分步爬虫，降低耦合性
@@ -116,27 +117,12 @@ class Spider:
     #----------------------------------------
     def crawl(self, start, end):
 
-        picList = []
-
-        # 建立浏览器对象 ，通过Phantomjs
-        self.browser = webdriver.PhantomJS()
-        # 访问url
-        self.browser.get(url)
-
-        # 等待一定时间，让js脚本加载完毕
-        self.browser.implicitly_wait(3)
-
-        picUrlList = self.browser.find_elements_by_css_selector("a.view_img_link")
-
-        for picUrl in picUrlList:
-            picUrl = picUrl.get_attribute("href")
-            print(picUrl)
-            picList.append(picUrl)
+        for i in range(start, end):
+            self.crawlPage(i)
+            print ("开始爬取下一个页面")
 
         # 关闭浏览器
         self.browser.quit()
-
-
 if __name__ == '__main__':
 
     '''
@@ -154,15 +140,7 @@ if __name__ == '__main__':
     '''
     url = 'https://jandan.net/ooxx'
     spider = Spider(url)
-    #spider.openUrl(url)
-    #page = spider.getPage(100)
-    #spider.getContents(spider.getPage(100))
-    spider.crawl(100, 110)
-    #print(spider.getLatestPage())
-    #spider.crawlLatestPics(10)
-
-
-
+    spider.crawl(1, 500)
 
 
 
